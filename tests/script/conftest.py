@@ -10,6 +10,7 @@ import pytest
 # This part of the test suite is in development, the aim is to find a way to easily test
 # a script included in a Python package through pytest.
 
+
 class TestEnvironment(object):
     def __init__(self, path):
         self.finalize = True
@@ -41,9 +42,23 @@ class TestEnvironment(object):
             assert len(l) > 0
 
 
+def punch_root():
+
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, os.pardir)
+
+
+def fix_os_path():
+    old = os.environ.get("PATH", "")
+    scripts_path = os.path.join(punch_root(), "scripts")
+    if scripts_path not in old:
+        os.environ["PATH"] = ":".join([scripts_path, old])
+
+
 @pytest.fixture
 def test_environment(request):
     tempdir = tempfile.mkdtemp()
+
+    fix_os_path()
 
     te = TestEnvironment(tempdir)
 
@@ -53,5 +68,4 @@ def test_environment(request):
 
     request.addfinalizer(fin)
     return te
-
 
